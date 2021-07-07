@@ -1,0 +1,45 @@
+.navbar{
+    width: 100vw;
+}
+
+.navbar-items{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+    height: 100%;
+}
+
+.navbar-item{
+    float: left;
+}
+
+.navbar-item a{
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 16px;
+}
+
+.navbar-item a:hover,
+.navbar-item button:hover{
+    background-color: #111;
+}
+
+.navbar-item button{
+    background-color: #333;
+    border: none;
+    font-size: medium;
+    color: white;
+}
+
+.navbar-item button > p{
+    padding: 0 16px;
+}
+
+.active{
+    background-color: #111;
+}
+
+

@@ -1,0 +1,33 @@
+.blog{
+    background-color: rgb(247, 242, 233);
+    border: 1px solid rgb(240, 227, 204);
+    margin: 5px 5px;
+    width: 400px;
+    display: block;
+    height: fit-content;
+    box-sizing: border-box;
+}
+
+.blog-img{
+    /* background-color: steelblue; */
+    padding: auto 10px ;
+} 
+
+.blog-img-item{
+    /* background-color: teal; */
+    width: 100%;
+    max-width: 400px;
+    max-height: 300px;
+    height: auto;
+}
+
+.add-comment-form{
+    display: flex;
+    flex-direction: row;
+}
+
+.add-comment-form > form > input {
+    width: 100% !important;
+    margin: 0 5px;
+    outline: none;
+}

@@ -1,0 +1,32 @@
+.add-blog-form{
+    background-color: rgb(233, 230, 230);
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 15px 20px;
+}
+
+.form-control >  textarea {
+    width: 100%;
+    max-width: 100% !important;
+    outline: none;
+    padding: 3px;
+    font-size: larger;
+    font-weight: 600;
+    border: 2px solid white;
+    display: block;
+}
+
+.form-control > input[type=file] {
+    background-color: transparent !important;
+    border: transparent !important;
+}
+.add-blog{
+    width: 100%;
+    background-color: #0d3562 !important;
+    color: white !important;
+}
+
+.add-blog:hover {
+    background-color: #184375 !important;
+    color: #ccc !important;
+}

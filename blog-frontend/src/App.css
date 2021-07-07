@@ -1,0 +1,16 @@
+.App {
+  text-align: center;
+}
+
+.btn{
+  background-color: white;
+  border: none;
+  color: black;
+  outline: none;
+  cursor: pointer;
+  padding: 10px;
+  margin: 10px auto;
+  font-weight: bold;
+  font-size: medium;
+}
+
