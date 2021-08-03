@@ -10,7 +10,7 @@ class Auth extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            email: 'abc@123.com',
+            username: 'Jaesung54',
             password: 'abc123',
             isSignUp: false
         };
@@ -28,19 +28,19 @@ class Auth extends React.Component {
 
     formSubmitHandler = (event) => {
         event.preventDefault();
-        const { email, password } = this.state;
-        const data = { email: email, password: password };
+        const { username, password } = this.state;
+        const data = { username: username, password: password };
         if (this.state.isSignUp) {
             AuthService.signup(data).then(res => {
                 this.props.dispatch({ type: actionTypes.AUTH_SUCCESS, user: res })
-                this.props.history.push('/');
+                this.props.history.goBack();
             }).catch(err => {
                 this.props.dispatch({ type: actionTypes.AUTH_FAIL, error: err.message })
             })
         } else {
             AuthService.login(data).then(res => {
                 this.props.dispatch({ type: actionTypes.AUTH_SUCCESS, user: res })
-                this.props.history.push('/');
+                this.props.history.goBack();
             }).catch(err => {
                 this.props.dispatch({ type: actionTypes.AUTH_FAIL, error: err.message })
             })
@@ -54,11 +54,11 @@ class Auth extends React.Component {
                     <p>Fill in the form below to login to your account.</p>
                     <div className="form-control">
                         <input
-                            placeholder="Email"
-                            name="email"
-                            type="email"
+                            placeholder="username"
+                            name="username"
+                            type="text"
                             onChange={this.handleChange}
-                            value={this.state.email}
+                            value={this.state.username}
                         />
                     </div>
                     <div className="form-control">

@@ -8,13 +8,12 @@ import './MyBlogs.css';
 const MyBlogs = (props) => {
 
     const [blogs, setBlogs] = useState([]);
-    const {dispatch, state} = props;
-    const userId = state.user.id;
-
+    const { dispatch, state } = props;
+    const username = state.user.username;
 
     useEffect(() => {
         const fetchedBlogs = () => {
-            BlogService.getBlogsByUserId(userId)
+            BlogService.getMyBlogs(username)
                 .then(res => {
                     setBlogs(res);
                 })
@@ -23,39 +22,22 @@ const MyBlogs = (props) => {
                 })
         }
         fetchedBlogs();
-    }, [dispatch,userId]);
+    }, [dispatch, username]);
 
-    const blogDeleteHandler = (id) => {
-        BlogService.deleteBlog(id, props.state.user.id)
-            .then(res => {
-                setBlogs(res);
-            })
-            .catch(err => {
-                props.dispatch({ type: SET_ERROR, error: err.message });
-            })
-    };
-
-    const updateBlogHandler = (blog) => {
-        props.history.push({
-            pathname: `/blog/${blog.id}`,
-            state: {
-                blog: blog
-            }
-        })
-    };
+    const fullBlogView = (blogId) => {
+        props.history.push(`/full-blog/${blogId}`);
+    }
 
     return (
         <div className="blogs-list">
             {blogs.length > 0
                 && blogs.map(blog => {
-                    return <div key={blog.id} className="blog">
-                        <h3>{blog.title}</h3>
-                        <p>{blog.description}</p>
-                        <div className="blog-img">
-                            {blog.imageUrl && <img className="blog-img-item" src={blog.imageUrl} alt={blog.title} />}
-                        </div>
-                        <button className="btn update" onClick={() => updateBlogHandler(blog)}>Update</button>
-                        <button className="btn delete" onClick={() => blogDeleteHandler(blog.id)}>Delete</button>
+                    return <div key={blog._id} className="blog" onClick={() => fullBlogView(blog._id)}>
+                        <div className="blog_title">{blog.title}</div>
+                        <div className="blog_body">{blog.body}</div>
+                        {blog.imageUrl && <div className="blog_image">
+                            <img src={blog.imageUrl} alt={blog.title} />
+                        </div>}
                     </div>
                 })
             }

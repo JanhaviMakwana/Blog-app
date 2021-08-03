@@ -5,6 +5,7 @@ import Error from './components/Error/Error';
 import NavBar from './components/NavBar/NavBar';
 import Blogs from './components/Blogs/Blogs';
 import AddBlog from './components/AddBlog/AddBlog';
+import FullBlog from './components/FullBlog/FullBlog';
 import MyBlogs from './components/MyBlogs/MyBlogs';
 import Auth from './components/Auth/Auth';
 import * as actionTypes from './store/actionTypes';
@@ -53,11 +54,10 @@ class App extends React.Component {
           ? <Switch>
             <PublicRoute path="/auth" isAuthenticated={this.props.state.user ? true : false} component={Auth} />
             <PrivateRoutes path="/add-blog" isAuthenticated={this.props.state.user ? true : false} component={AddBlog} />
+            <Route path="/full-blog/:id" component={FullBlog} />
             <PrivateRoutes path="/blog/:id" isAuthenticated={this.props.state.user ? true : false} component={AddBlog} />
             <PrivateRoutes path="/blogs" isAuthenticated={this.props.state.user ? true : false} component={MyBlogs} />
-            {/* <Route path="/add-blog" component={AddBlog} /> */}
             <Route path="/" component={Blogs} />
-
           </Switch>
           : <Error />}
       </div>

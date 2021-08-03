@@ -1,43 +1,32 @@
-const moment = require('moment');
-const appConfig = require('../config/app.config');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-module.exports = (sequelize, Sequelize) => {
-    const Blog = sequelize.define('blog', {
-        id: {
-            type: Sequelize.INTEGER,
-            autoIncrement: true,
-            allowNull: false,
-            primaryKey: true
+const blogSchema = new Schema(
+    {
+        title: {
+            type:String,
+            required: true,
+            trim: true,
+            minLength: 3
         },
-        title:{
-            type: Sequelize.STRING,
-            allowNull: false
+        body: {
+            type: String,
+            required: true,
+            trim: true
         },
-        description: {
-            type: Sequelize.STRING,
-            allowNull: false
+        author: {
+            type: String,
+            required:true
         },
-        imageUrl: {
-            type: Sequelize.STRING,
-            defaultValue: '',
-            get() {
-                const image = this.getDataValue('imageUrl');
-                return image ? `${appConfig.appUrl}:${appConfig.appPort}/${image}` : '';
-            }
+        imageUrl:{
+            type: String
         },
-        createdAt: {
-            type: Sequelize.DATE,
-            get() {
-                return moment(this.getDataValue('createdAt')).format('DD/MM/YYYY h:mm:ss');
-            }
-        },
-        updatedAt: {
-            type: Sequelize.DATE,
-            get() {
-                return moment(this.getDataValue('updatedAt')).format('DD/MM/YYYY h:mm:ss');
-            }
-        }
-    });
+        comments: []
+    },
+    {
+        timestamps: true
+    }
+);
 
-    return Blog;
-};
+const Blog = mongoose.model("Blog", blogSchema);
+module.exports = Blog;

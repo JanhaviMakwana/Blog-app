@@ -1,25 +1,106 @@
-const db = require('../models');
-const Blog = db.blog;
+const Blog = require('../models/blog');
+const appConfig = require('../config/app.config');
+const fs = require('fs');
 
-exports.postBlog = async (req, res) => {
-    const { title, description } = req.body;
+exports.postBlog = (req, res) => {
+    const { title, body, author } = req.body;
+    const comments = [];
+    const newblog = new Blog({ title, body, author, comments });
+    newblog
+        .save()
+        .then((result) => {
+            return res.send(result);
+        })
+        .catch(e => {
+            return res.status(500).json({ message: 'Internal Server Error' });
+        })
+}
+
+exports.getAllBlogs = async (req, res) => {
     try {
-        const blog = await req.user.createBlog({ title: title, description: description });
-        console.log(blog);
-        res.send(blog);
+        const fetchedBlog = await Blog.find({}, { _id: 1, comments: 1, title: 1, body: 1, author: 1, createdAt: 1, imageUrl:1  });
+        return res.send(fetchedBlog);
 
     } catch (e) {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
+
 };
+
+exports.getFullBlog = async (req, res) => {
+    const { blogId } = req.params;
+    try {
+        const fullBlog = await Blog.find({ _id: blogId }, { comments: 1, title: 1, body: 1, author: 1, createdAt: 1, imageUrl:1 });
+        return res.send(fullBlog[0]);
+    } catch (e) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+exports.postComment = async (req, res) => {
+    const { blogId } = req.params;
+    const { comment, user } = req.body;
+    try {
+        const updatedBlog = await Blog.updateOne({ _id: blogId }, { "$push": { comments: { body: comment, user: user, createAt: new Date() } } })
+
+        if (updatedBlog) {
+            return res.json({ message: 'Comment posted successfully' })
+        }
+
+    } catch (e) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+exports.updateBlog = async (req, res) => {
+    const { blogId } = req.params;
+    const { body, title } = req.body;
+    try {
+        const updatedBlog = await Blog.updateOne({ _id: blogId }, { body: body, title: title });
+        if (updatedBlog) {
+            return res.json({ message: 'Blog updated successfully' });
+        }
+
+    } catch (e) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+exports.deleteBlog = async (req, res) => {
+    const { blogId } = req.params;
+    try {
+        const deletedBlog = await Blog.findOne({ _id: blogId });
+
+        if (deletedBlog) {
+            if(deletedBlog.imageUrl) {
+                const filename = deletedBlog.imageUrl.split(`${appConfig.appUrl}:${appConfig.appPort}/`)[1];
+                fs.unlinkSync(`uploads/${filename}`);
+            }
+            deletedBlog.remove();
+            return res.json({ message: 'Blog deleted successfully' });
+        }
+    } catch (e) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+exports.getBlogsByUsername = async (req, res) => {
+    const { username } = req.params;
+    try {
+        const blogs = await Blog.find({ author: username }, { _id: 1, body: 1, title: 1, author: 1, imageUrl:1  })
+        return res.send(blogs);
+
+    } catch (e) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
 
 exports.uploadImage = async (req, res) => {
     const { blogId } = req.params;
     if (req.file) {
-        const blog = await Blog.update({ imageUrl: req.file.filename }, { where: { id: blogId } });
+        const blog = await Blog.updateOne({ _id: blogId }, { imageUrl: `${appConfig.appUrl}:${appConfig.appPort}/${req.file.filename}` });
         if (blog) {
-            const blogs = await Blog.findAll();
-            return res.send(blogs);
+            return res.json("Blog-image uploaded successfully !");
         } else {
             return res.status(404).json({ message: 'Blog not found' });
         }
@@ -28,82 +109,3 @@ exports.uploadImage = async (req, res) => {
     return res.status(500).json('No image uploaded')
 };
 
-exports.getAllBlogs = async (req, res) => {
-    try {
-        const blogs = await Blog.findAll({ include: ['comments'] });
-        if (blogs.length > 0) {
-            return res.send(blogs);
-        }
-        return res.send([]);
-
-    } catch (e) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
-
-exports.getBlogsByUserId = async (req, res) => {
-    try {
-        const blogs = await req.user.getBlogs();
-        return res.send(blogs);
-    } catch (e) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
-
-exports.getBlogById = async (req, res) => {
-    const { blogId } = req.params;
-    try {
-        const blog = await Blog.findByPk(blogId);
-        return res.send(blog);
-    } catch (e) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
-
-exports.deleteBlog = async (req, res) => {
-    const { blogId } = req.params;
-    try {
-        const blog = await (await Blog.findByPk(blogId)).destroy();
-        if (blog) {
-            const blogs = await req.user.getBlogs();
-            return res.send(blogs);
-        }
-        return res.json({ message: "Blog doesn't exist" });
-
-    } catch (e) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
-
-exports.addComment = async (req, res) => {
-    const { blogId, desc } = req.body;
-    try {
-        const comment = await req.user.createComment({ blogId: blogId, description: desc })
-            .then(comment => {
-
-                return comment;
-            })
-
-
-        return res.send(comment);
-
-    } catch (e) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-};
-
-exports.updateBlog = async (req, res) => {
-    const { blogId } = req.params;
-    const { title, description } = req.body;
-
-    try {
-        const blog = await Blog.findByPk(blogId);
-
-        if (blog) {
-            const updatedBlog = await blog.update({ title: title, description: description });
-            return res.send(updatedBlog);
-        }
-    } catch (e) {
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-};

@@ -1,8 +1,5 @@
 const multer = require('multer');
 const fs = require('fs');
-const appConfig = require('../config/app.config');
-const db = require('../models');
-
 
 const getFileType = (file) => {
     const mimeType = file.mimetype.split('/');
@@ -28,7 +25,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 exports.blogImageUpload = ((req, res, next) => {
-    console.log(req);
+
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
 
@@ -49,21 +46,3 @@ exports.blogImageUpload = ((req, res, next) => {
     return multer({ storage, fileFilter }).single('image')
 })();
 
-exports.blogImageRemove = async (req, res, next) => {
-
-    const { blogId } = req.params;
-    const blog = await db.blog.findByPk(blogId);
-    if (blog && blog.imageUrl) {
-        const filename = blog.imageUrl.split(`${appConfig.appUrl}:${appConfig.appPort}/`)[1];
-        try {
-            fs.unlinkSync(`uploads/${filename}`);
-            next();
-        } catch (e) {
-            return res.status(400).send({ message: "Error deleting image!" });
-        }
-    } else {
-        next();
-    }
-
-
-};

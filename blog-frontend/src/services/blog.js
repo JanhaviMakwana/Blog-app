@@ -11,9 +11,9 @@ const BlogService = {
                 throw new Error(err.response.data.message);
             });
     },
-    uploadBlogImage: (data, blogId) => {
-        return axios.post(`/upload-image/${blogId}`, data)
-            .then(({ data }) => {
+    updateBlog: (data, blogId) => {
+        return axios.post(`/update-blog/${blogId}`, data)
+            .then((data) => {
                 return data;
             })
             .catch(err => {
@@ -29,8 +29,19 @@ const BlogService = {
                 throw new Error(err.response.data.message);
             });
     },
-    getBlogsByUserId: (userId) => {
-        return axios.get(`/blogs/${userId}`)
+
+    getFullBlog: (blogId) => {
+        return axios.get(`/blog/${blogId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch(err => {
+                console.log(err);
+                throw new Error(err.response.data.message);
+            });
+    },
+    postComment: (blogId, data) => {
+        return axios.post(`/post-comment/${blogId}`, data)
             .then(({ data }) => {
                 return data;
             })
@@ -38,8 +49,19 @@ const BlogService = {
                 throw new Error(err.response.data.message);
             });
     },
-    deleteBlog: (blogId, userId) => {
-        return axios.get(`/delete-blog/${userId}/${blogId}`)
+
+    deleteBlog: (blogId) => {
+        return axios.get(`/delete-blog/${blogId}`)
+            .then((data) => {
+                return data;
+            })
+            .catch(err => {
+                throw new Error(err.response.data.message);
+            });
+    },
+
+    getMyBlogs: (username) => {
+        return axios.get(`/myblogs/${username}`)
             .then(({ data }) => {
                 return data;
             })
@@ -47,18 +69,9 @@ const BlogService = {
                 throw new Error(err.response.data.message);
             });
     },
-    postComment: (userId, data) => {
-        return axios.post(`/add-comment/${userId}`, data)
-            .then(({ data }) => {
-                return data;
-            })
-            .catch(err => {
-                throw new Error(err.response.data.message);
-            });
-    },
-    updateBlog: (blogId, data) => {
-        return axios.post(`/update-blog/${blogId}`, data)
-            .then(({ data }) => {
+    uploadBlogImage: (imageData, blogId) => {
+        return axios.post(`/upload-image/${blogId}`, imageData)
+            .then((data) => {
                 return data;
             })
             .catch(err => {

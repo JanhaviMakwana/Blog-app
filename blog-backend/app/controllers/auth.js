@@ -1,18 +1,18 @@
-const db = require('../models');
-const User = db.user;
+const User = require('../models/user');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const appConfig = require('../config/app.config');
 
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
     try {
-        const user = await User.findOne({ where: { email: email, password: password } });
+
+        const user = await User.findOne({ username: username, password: password }, { 'username': 1 });
 
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        const userWithToken = generateToken(user.get({ raw: true }));
+        const userWithToken = generateToken(user);
 
         return res.send(userWithToken);
     } catch (e) {
@@ -26,14 +26,19 @@ exports.signup = async (req, res) => {
         return res.status(400).json({ errors: errors.array() })
     };
 
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     try {
-        const user = await User.create({ email: email, password: password });
+        const existingUser = await User.findOne({ username: username });
 
-        const userWithToken = generateToken(user.get({ raw: true }));
+        if (!existingUser) {
+            const user = await User.create({ username: username, password: password });
 
-        return res.send(userWithToken);
+            const userWithToken = generateToken({ _id: user._id, username: user.username });
+
+            return res.send(userWithToken);
+        }
+        return res.json({ message: 'username already in use...' })
 
     } catch (e) {
         return res.status(500).json({ message: 'Internal Server Error' });
@@ -41,9 +46,9 @@ exports.signup = async (req, res) => {
 };
 
 const generateToken = (user) => {
-    delete user.password;
+    const token = jwt.sign({ id: user._id, username: user.username }, appConfig.appKey, { expiresIn: '86400' });
 
-    const token = jwt.sign(user, appConfig.appKey, { expiresIn: '86400' });
-
-    return { ...{ user }, ...{ token } }
+    return {
+        ...{ user }, ...{ token }
+    }
 };

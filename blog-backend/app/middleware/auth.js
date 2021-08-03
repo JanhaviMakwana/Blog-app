@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const appConfig = require('../config/app.config');
-const db = require('../models');
 
 exports.authenticate =  (req, res, next) => {
     const token = req.headers['authorization'].split('Bearer ')[1];
@@ -16,16 +15,4 @@ exports.authenticate =  (req, res, next) => {
             next();
         })
     };
-};
-
-exports.getCurrentUser = async (req, res, next) => {
-    const {userId} = req.params;
-    try{
-        const user = await db.user.findByPk(userId);
-        req.user = user;
-        next();
-
-    }catch (e) {
-        return res.status(500).json({ message: e.message });
-    }
 };

@@ -10,7 +10,7 @@ import './Blogs.css';
 const Blogs = (props) => {
 
     const [blogs, setBlogs] = useState([]);
-    const {dispatch} = props;
+    const { dispatch } = props;
 
     useEffect(() => {
         const fetchedBlogs = () => {
@@ -29,7 +29,7 @@ const Blogs = (props) => {
         <div className="blogs-list">
             {blogs.length > 0
                 && blogs.map(blog => {
-                    return <Blog key={blog.id} blog={blog} />
+                    return <Blog key={blog._id} blog={blog} />
                 })
             }
         </div>

@@ -10,27 +10,29 @@ const AddBlog = (props) => {
 
     const [formData, setFormData] = useState({
         title: '',
-        desc: '',
+        author: '',
+        body: '',
         image: null
     });
 
     const [isUpdate, setIsUpdate] = useState(false);
-    const state  = props.location.state ? props.location.state : null;
-
+    const state = props.location.state ? props.location.state : null;
+    
 
     useEffect(() => {
-        const updateForm = () => {
-            if (state != null) {
-                const blog = state.blog;
-                const fetchedForm = {
-                    desc: blog.description,
-                    title: blog.title
-                } 
-                setFormData(fetchedForm);
-                setIsUpdate(true);
+        const updateForm = async () => {
+            const blog = await BlogService.getFullBlog(state.blog._id);
+            const fetchedForm = {
+                body: blog.body,
+                title: blog.title,
+                author: blog.author
             }
+
+            setFormData(fetchedForm);
+            setIsUpdate(true);
+
         };
-        updateForm();
+        if (state != null) { updateForm(); }
 
     }, [state])
 
@@ -49,25 +51,29 @@ const AddBlog = (props) => {
         const imageData = new FormData();
         const data = {
             title: formData.title,
-            description: formData.desc
+            body: formData.body,
+            author: props.state.user.username
         };
+        
 
         if (isUpdate) {
             const blog = props.location.state.blog;
-            BlogService.updateBlog(blog.id, data)
-                .then(res => {
-                    props.history.push('/blogs');
+            
+            BlogService.updateBlog(data, blog._id)
+                .then(() => {
+                    props.history.push(`/full-blog/${blog._id}`);
                 })
                 .catch(err => {
                     props.dispatch({ type: SET_ERROR, error: err.message });
                 })
         } else {
-            BlogService.postBlog(data, props.state.user.id)
+            BlogService.postBlog(data, props.state.user._id)
                 .then(res => {
+                    
                     if (formData.image !== null) {
                         imageData.append('image', formData.image);
-                        BlogService.uploadBlogImage(imageData, res.id)
-                            .then(res => {
+                        BlogService.uploadBlogImage(imageData, res._id)
+                            .then(() => {
                                 props.history.push('/');
                             })
                             .catch(err => {
@@ -97,16 +103,6 @@ const AddBlog = (props) => {
                         onChange={formDataHandler}
                     />
                 </div>
-                <div className="form-control">
-                    <textarea
-                        value={formData.desc}
-                        name="desc"
-                        placeholder="description"
-                        id="description"
-                        rows="3"
-                        onChange={formDataHandler}
-                    />
-                </div>
                 {!isUpdate && <div className="form-control">
                     <input
                         type="file"
@@ -114,6 +110,15 @@ const AddBlog = (props) => {
                         onChange={formDataHandler}
                     />
                 </div>}
+                <div className="form-control">
+                    <textarea
+                        value={formData.body}
+                        name="body"
+                        placeholder="description"
+                        rows="3"
+                        onChange={formDataHandler}
+                    />
+                </div>
 
                 <button className="btn add-blog" type="submit">Add</button>
                 {isUpdate && <button className="btn" onClick={() => { props.history.goBack() }}>CANCEL</button>}

@@ -1,14 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const blogRoutes = require('./app/routes/blog');
+const mongoose = require('mongoose');
+const blogRoutes = require('./app/routes/blog'); 
 const authRoutes = require('./app/routes/auth');
-const db = require('./app/models');
-const PORT = require('./app/config/app.config').appPort;
+const { appPort } = require('./app/config/app.config');
+const { dbUrl } = require('./app/config/database.config');
 
 const app = express();
 
 app.use(cors({
-    'allowedHeaders': ['sessionId', 'Content-Type', 'Origin', 'Authorization'],
+    'allowedHeaders': ['sessionId', 'Content-Type', 'Origin', 'authorization'],
     'credentials': true,
     'origin': 'http://localhost:3000',
     'methods': 'GET, HEAD, PUT,POST,DELETE'
@@ -20,7 +21,7 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-app.use(blogRoutes);
+app.use(blogRoutes); 
 app.use(authRoutes);
 
 app.use(express.static(__dirname + '/uploads'));
@@ -28,10 +29,19 @@ app.use(express.static(__dirname + '/uploads'));
 
 const server = require('http').createServer(app);
 
-db.sequelize.sync({ force: false})
-    .then(res => {
-        server.listen(PORT);
+mongoose.Promise = global.Promise;
+
+mongoose.connect(dbUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+    .then(() => {
+        console.log("MongoDB connection has been established!")
+        server.listen(appPort);
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        console.log("err");
+        console.log(err);
+    })
 
 
